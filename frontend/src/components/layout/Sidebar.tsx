@@ -5,11 +5,13 @@ const NAV_ITEMS = [
   { label: 'Risk Map', active: false },
   { label: 'Historical Events', active: false },
   { label: 'Alerts', active: false },
+  { label: 'Data Sources', active: false },
 ];
 
 export function Sidebar() {
   return (
-    <nav className={styles.sidebar}>
+    <nav className={styles.sidebar} aria-label="Sidebar navigation">
+      <div className={styles.sectionLabel}>Operations</div>
       <ul className={styles.list}>
         {NAV_ITEMS.map((item) => (
           <li
@@ -22,7 +24,8 @@ export function Sidebar() {
         ))}
       </ul>
       <p className={styles.note}>
-        Navigation is a placeholder. Only the Dashboard is currently wired up.
+        Placeholder navigation. Future routes will be connected once the risk
+        backend and dashboard workflows are finalized.
       </p>
     </nav>
   );
