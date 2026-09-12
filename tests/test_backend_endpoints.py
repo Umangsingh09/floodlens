@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 import rasterio
 from rasterio.transform import from_bounds
 
@@ -84,6 +85,23 @@ def test_raster_endpoint_serves_real_geotiff(tmp_path, monkeypatch):
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/tiff"
     assert len(response.content) > 0
+
+
+def test_grid_endpoint_returns_real_cell_values(tmp_path, monkeypatch):
+    _write_fixture_prediction(tmp_path)
+    monkeypatch.setattr("app.core.config.settings.output_dir", str(tmp_path))
+
+    response = client.get("/api/risk/20260101T000000Z/grid")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["rows"] == 2
+    assert body["cols"] == 2
+    assert len(body["cells"]) == 4
+    values = sorted(cell["value"] for cell in body["cells"])
+    assert values == pytest.approx([0.1, 0.4, 0.6, 0.9], abs=1e-6)
+    for cell in body["cells"]:
+        assert 85.0 <= cell["lon"] <= 85.1
+        assert 26.0 <= cell["lat"] <= 26.1
 
 
 def test_preview_png_endpoint_renders_upsampled_image(tmp_path, monkeypatch):

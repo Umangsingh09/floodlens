@@ -1,97 +1,108 @@
-import { RiskMapPlaceholder } from '../components/map/RiskMapPlaceholder';
+import { ObservationWindow } from '../components/dashboard/ObservationWindow';
+import { Panel } from '../components/dashboard/Panel';
+import { PipelineSteps } from '../components/dashboard/PipelineSteps';
+import { RiskGauge } from '../components/dashboard/RiskGauge';
+import { RiskTrend } from '../components/dashboard/RiskTrend';
+import { StatTile } from '../components/dashboard/StatTile';
+import { ClockIcon, GridIcon, SatelliteIcon, TrendIcon } from '../components/icons/Icons';
+import { RiskMap } from '../components/map/RiskMap';
+import { useRiskHistory } from '../hooks/useRiskHistory';
+import { formatPercent } from '../lib/format';
+import type { RegionInfo } from '../types/region';
+import type { RiskSnapshot } from '../types/risk';
 import styles from './DashboardPage.module.css';
 
-function MetricCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <article className={styles.metricCard}>
-      <span className={styles.metricLabel}>{label}</span>
-      <strong className={styles.metricValue}>{value}</strong>
-    </article>
-  );
+interface DashboardPageProps {
+  region: RegionInfo | null;
+  risk: RiskSnapshot | null;
+  regionLoading: boolean;
+  riskLoading: boolean;
 }
 
-export function DashboardPage() {
+export function DashboardPage({ region, risk, regionLoading, riskLoading }: DashboardPageProps) {
+  const history = useRiskHistory(risk?.predictionId);
+
+  if (regionLoading || riskLoading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.skeletonHero} />
+        <div className={styles.skeletonMap} />
+      </div>
+    );
+  }
+
+  if (!region) {
+    return (
+      <div className={styles.empty}>
+        <p>Region configuration is unavailable right now.</p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
-      <header className={styles.hero}>
-        <div>
-          <p className={styles.eyebrow}>Monitoring overview</p>
-          <h1>Flood Risk Dashboard</h1>
-        </div>
-      </header>
+      <div className={styles.pageHead}>
+        <span className={styles.eyebrow}>
+          {risk ? `${Math.round(risk.predictionHorizonHours / 24)}-day outlook` : 'Spatial outlook'}
+        </span>
+        <h1 className={styles.heading}>Where flood risk is elevated across {region.aoiName}</h1>
+        <p className={styles.lede}>
+          Derived from Sentinel-1 radar backscatter change and terrain features, aggregated to a{' '}
+          {risk?.resolutionMeters ?? 250}m grid.
+        </p>
+      </div>
 
-      <section className={styles.metricsGrid} aria-label="Risk summary metrics">
-        <MetricCard label="Overall Risk" value="N/A" />
-        <MetricCard label="High-Risk Area" value="Awaiting model" />
-        <MetricCard label="Active Alerts" value="Not available" />
-        <MetricCard label="Latest Satellite Pass" value="N/A" />
-      </section>
+      {risk ? (
+        <>
+          <div className={styles.grid}>
+            <Panel icon={<TrendIcon />} title="Mean risk" subtitle={`peak cell ${formatPercent(risk.risk.max)}`}>
+              <div className={styles.gaugeRow}>
+                <RiskGauge value={risk.risk.mean} alertLevel={risk.alert.level} />
+                <div className={styles.gaugeStats}>
+                  <StatTile label="Outlook" value={`${Math.round(risk.predictionHorizonHours / 24)}d`} />
+                  <StatTile label="Grid" value={`${risk.resolutionMeters}m`} />
+                </div>
+              </div>
+            </Panel>
 
-      <section className={styles.primaryGrid}>
-        <div className={styles.mapPanel}>
-          <div className={styles.panelHeader}>
-            <h2>Flood Risk Map</h2>
-            <span className={styles.panelTag}>FloodLens study region</span>
+            <Panel
+              icon={<SatelliteIcon />}
+              title="Observation window"
+              subtitle="most recent Sentinel-1 passes"
+            >
+              {risk.observationWindowScenes && risk.observationWindowScenes.length > 0 ? (
+                <ObservationWindow scenes={risk.observationWindowScenes} />
+              ) : (
+                <p className={styles.muted}>No scene metadata recorded for this pass.</p>
+              )}
+            </Panel>
+
+            <Panel icon={<ClockIcon />} title="Recent readings" subtitle="mean risk per observation">
+              <RiskTrend points={history} />
+            </Panel>
           </div>
-          <RiskMapPlaceholder />
-        </div>
 
-        <aside className={styles.summaryPanel}>
-          <div className={styles.panelHeader}>
-            <h2>Risk Summary</h2>
+          <Panel icon={<GridIcon />} title="Spatial risk map" subtitle={region.aoiName} span="full">
+            <RiskMap region={region} risk={risk} />
+          </Panel>
+
+          <Panel title="From satellite pass to prediction" span="full">
+            <PipelineSteps risk={risk} />
+          </Panel>
+
+          <div className={styles.caption}>
+            <span>{risk.satellite}</span>
+            <span>·</span>
+            <span>{region.satelliteCollection}</span>
+            <span>·</span>
+            <span>model {risk.modelVersion}</span>
           </div>
-
-          <dl className={styles.summaryList}>
-            <div className={styles.summaryRow}>
-              <dt>Current Risk Status</dt>
-              <dd>N/A</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>Risk Score</dt>
-              <dd>Awaiting backend</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>Prediction Time</dt>
-              <dd>N/A</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>Satellite Acquisition</dt>
-              <dd>N/A</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>Prediction Lag</dt>
-              <dd>Awaiting backend</dd>
-            </div>
-            <div className={styles.summaryRow}>
-              <dt>Model Status</dt>
-              <dd>Awaiting backend</dd>
-            </div>
-          </dl>
-        </aside>
-      </section>
-
-      <section className={styles.infoGrid}>
-        <article className={styles.infoCard}>
-          <h3>Historical Flood Validation</h3>
-          <p className={styles.eventName}>2017 Bihar–Nepal Flood</p>
-          <p className={styles.eventStatus}>Validation pending</p>
-        </article>
-
-        <article className={styles.infoCard}>
-          <h3>Data Sources</h3>
-          <ul className={styles.sourceList}>
-            <li>Sentinel-1 SAR</li>
-            <li>Digital Elevation Model</li>
-            <li>Bihar–Southern Nepal study region</li>
-          </ul>
-        </article>
-      </section>
+        </>
+      ) : (
+        <Panel title="Spatial risk map" subtitle={region.aoiName} span="full">
+          <RiskMap region={region} risk={null} />
+        </Panel>
+      )}
     </div>
   );
 }

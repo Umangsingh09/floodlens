@@ -6,8 +6,8 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, Response
 
 from app.core.config import settings
-from app.schemas.risk import RiskResponse
-from app.services.raster_service import render_risk_preview_png, resolve_raster_path
+from app.schemas.risk import RiskGridResponse, RiskHistoryPoint, RiskResponse
+from app.services.raster_service import read_risk_grid, render_risk_preview_png, resolve_raster_path
 from app.services.risk_service import RiskService
 
 logger = logging.getLogger(__name__)
@@ -47,6 +47,11 @@ def refresh_risk() -> RiskResponse:
     return prediction
 
 
+@router.get("/risk/history", response_model=list[RiskHistoryPoint])
+def get_risk_history(limit: int = 20) -> list[RiskHistoryPoint]:
+    return risk_service.list_history(limit=limit)
+
+
 @router.get("/risk/{prediction_id}", response_model=RiskResponse)
 def get_risk_by_id(prediction_id: str) -> RiskResponse:
     try:
@@ -74,3 +79,13 @@ def get_risk_preview(prediction_id: str) -> Response:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     return Response(content=png_bytes, media_type="image/png")
+
+
+@router.get("/risk/{prediction_id}/grid", response_model=RiskGridResponse)
+def get_risk_grid(prediction_id: str) -> RiskGridResponse:
+    try:
+        grid = read_risk_grid(prediction_id, base_dir=settings.output_dir)
+    except (ValueError, FileNotFoundError) as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    return RiskGridResponse(**grid)

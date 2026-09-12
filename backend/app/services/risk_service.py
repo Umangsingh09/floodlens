@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from app.schemas.risk import RiskAlert, RiskBounds, RiskResponse, RiskSummary
+from app.schemas.risk import RiskAlert, RiskBounds, RiskHistoryPoint, RiskResponse, RiskSummary
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,32 @@ class RiskService:
             alert=alert,
             rasterUrl=f"/api/risk/{prediction_id}/raster" if has_raster else None,
             previewUrl=f"/api/risk/{prediction_id}/preview.png" if has_raster else None,
+            gridUrl=f"/api/risk/{prediction_id}/grid" if has_raster else None,
+            observationWindowScenes=metadata.get("observationWindowScenes"),
+            gridShape=metadata.get("gridShape"),
         )
+
+    def list_history(self, *, limit: int = 20) -> list[RiskHistoryPoint]:
+        if not self.output_dir.exists():
+            return []
+        candidates = sorted(p for p in self.output_dir.iterdir() if p.is_dir())
+        points: list[RiskHistoryPoint] = []
+        for candidate in candidates[-limit:]:
+            try:
+                metadata = self.load_metadata(candidate.name)
+            except (FileNotFoundError, json.JSONDecodeError):
+                continue
+            mean = float(metadata.get("risk", {}).get("mean", 0.0))
+            threshold = float(metadata.get("alert", {}).get("threshold", 0.7))
+            points.append(
+                RiskHistoryPoint(
+                    predictionId=candidate.name,
+                    predictionTimestamp=metadata.get("predictionTimestamp", ""),
+                    mean=mean,
+                    alertLevel=self.calculate_alert(mean, threshold),
+                )
+            )
+        return points
 
     @staticmethod
     def calculate_alert(mean_risk: float, threshold: float) -> str:
