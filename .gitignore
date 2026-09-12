@@ -1,0 +1,57 @@
+# --- Node / frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# --- Python / backend & AI ---
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Environment files ---
+.env
+.env.*
+!.env.example
+
+# --- Build output ---
+build/
+out/
+
+# --- IDE / editor ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
+npm-debug.log*
+
+# --- Large / generated data and model artifacts ---
+data/*
+!data/.gitkeep
+ai/data/*
+!ai/data/.gitkeep
+*.tif
+*.tiff
+*.nc
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.parquet

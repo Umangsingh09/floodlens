@@ -1,0 +1,19 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 960px;
+}
+
+.summary h1 {
+  margin: 0 0 0.5rem;
+}
+
+.description {
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.mapSection h2 {
+  margin: 0 0 0.75rem;
+}
