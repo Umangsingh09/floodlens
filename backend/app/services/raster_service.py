@@ -57,6 +57,26 @@ def _colorize(risk: np.ndarray) -> np.ndarray:
     return rgba
 
 
+def read_risk_grid(prediction_id: str, *, base_dir: str | Path | None = None) -> dict:
+    """Return each grid cell's real center coordinate and risk value.
+
+    Used to render discrete color-coded markers (rather than a translucent image overlay), which
+    reads more clearly as "this specific spot is high/medium/low risk" at a glance.
+    """
+    raster_path = resolve_raster_path(prediction_id, base_dir=base_dir)
+
+    with rasterio.open(raster_path) as src:
+        risk = src.read(1)
+        rows, cols = risk.shape
+        cells = []
+        for row in range(rows):
+            for col in range(cols):
+                lon, lat = src.xy(row, col)
+                cells.append({"lat": lat, "lon": lon, "value": float(risk[row, col])})
+
+    return {"rows": rows, "cols": cols, "cells": cells}
+
+
 def render_risk_preview_png(prediction_id: str, *, base_dir: str | Path | None = None) -> bytes:
     """Render the risk raster as an upsampled, color-mapped RGBA PNG for a Leaflet ImageOverlay."""
     raster_path = resolve_raster_path(prediction_id, base_dir=base_dir)

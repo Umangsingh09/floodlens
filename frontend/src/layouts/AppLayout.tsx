@@ -1,20 +1,18 @@
 import type { ReactNode } from 'react';
-import { Header } from '../components/layout/Header';
-import { Sidebar } from '../components/layout/Sidebar';
 import styles from './AppLayout.module.css';
 
 interface AppLayoutProps {
+  header: ReactNode;
+  tabs: ReactNode;
   children: ReactNode;
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ header, tabs, children }: AppLayoutProps) {
   return (
     <div className={styles.shell}>
-      <Header />
-      <div className={styles.body}>
-        <Sidebar />
-        <main className={styles.content}>{children}</main>
-      </div>
+      {header}
+      {tabs}
+      <main className={styles.content}>{children}</main>
     </div>
   );
 }

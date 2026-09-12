@@ -1,17 +1,13 @@
 .shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: var(--color-background);
-}
-
-.body {
-  display: flex;
-  flex: 1;
+  min-height: 100svh;
 }
 
 .content {
   flex: 1;
-  padding: 1.5rem;
-  overflow: auto;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.75rem 1.5rem 3rem;
 }

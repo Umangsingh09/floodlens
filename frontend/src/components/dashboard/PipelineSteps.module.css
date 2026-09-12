@@ -1,0 +1,62 @@
+.track {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.dotRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.2rem;
+}
+
+.dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.connector {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-border));
+  margin-left: 0.4rem;
+}
+
+.label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.detail {
+  font-size: 0.74rem;
+  color: var(--color-text-faint);
+}
+
+@media (max-width: 720px) {
+  .track {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.4rem;
+  }
+
+  .connector {
+    display: none;
+  }
+}

@@ -39,3 +39,25 @@ class RiskResponse(BaseModel):
     alert: RiskAlert
     rasterUrl: str | None = None
     previewUrl: str | None = None
+    gridUrl: str | None = None
+    observationWindowScenes: list[str] | None = None
+    gridShape: list[int] | None = None
+
+
+class RiskHistoryPoint(BaseModel):
+    predictionId: str
+    predictionTimestamp: str
+    mean: float
+    alertLevel: str
+
+
+class RiskGridCell(BaseModel):
+    lat: float
+    lon: float
+    value: float
+
+
+class RiskGridResponse(BaseModel):
+    rows: int
+    cols: int
+    cells: list[RiskGridCell]
