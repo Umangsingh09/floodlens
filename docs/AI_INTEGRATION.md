@@ -32,6 +32,31 @@ response) must include:
 | `modelId` / `modelVersion` | Identifier of the model and version that produced the output | For traceability/reproducibility |
 | `dataSources` | Which satellite product(s)/bands (and any secondary data source) were used | |
 
+## Historical reference note (validated)
+
+The project has verified a real historical flood-validation reference from the
+Global Flood Database / Dartmouth Flood Observatory:
+
+- Dataset: `GLOBAL_FLOOD_DB/MODIS_EVENTS/V1`
+- Event: DFO 4507
+- Dates: 2017-08-10 to 2017-08-26
+- Primary country: India
+- Reference class: remotely sensed historical reference
+- Not ground truth: this is a MODIS-derived satellite reference, not a field-verified
+  flood measurement.
+
+The flood-reference mask is defined as:
+
+```python
+flood_reference = flooded == 1 AND jrc_perm_water == 0
+```
+
+This is used for historical validation only. It remains separate from model training
+and is not used to create the training set for the current pipeline. The official
+source is the Google Earth Engine Data Catalog entry for the Global Flood Database
+v1, published by Cloud to Street / Dartmouth Flood Observatory; the dataset is
+catalogued under the CC BY-NC 4.0 terms referenced by the project source materials.
+
 ## Non-requirements (explicitly out of scope for this contract)
 
 - The internal model architecture.
