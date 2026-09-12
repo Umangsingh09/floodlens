@@ -6,3 +6,7 @@ httpx==0.28.1
 requests==2.32.3
 pytest==8.3.3
 scikit-learn==1.9.1
+earthengine-api==1.7.43
+rasterio==1.5.1
+Pillow==12.3.0
+apscheduler==3.11.3

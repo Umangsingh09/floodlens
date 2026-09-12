@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
@@ -295,33 +295,28 @@ def _compute_training_label(
     return np.asarray(reference, dtype=np.bool_), excluded
 
 
-def build_real_training_sample(
+def _select_and_build_feature_grid(
     aoi_geometry: Any,
     observation_timestamp: Any,
     *,
-    settings: Any | None = None,
-    sample_region: Any | None = None,
-    grid_spec: GridSpec | None = None,
-    min_scene_count: int = 3,
-    max_lookback_days: int = 30,
-    gfd_start_date: str = "2017-08-10",
-    gfd_end_date: str = "2017-08-27",
-) -> tuple[dict[str, np.ndarray], np.ndarray, dict[str, Any]]:
-    """Build a small, leakage-safe real Earth Engine training sample.
+    settings: Any,
+    sample_region: Any | None,
+    grid: GridSpec,
+    min_scene_count: int,
+    max_lookback_days: int,
+) -> dict[str, Any]:
+    """Select a real, causally-valid Sentinel-1 observation window and build its feature grid.
 
-    The sample intentionally uses a tiny ROI and a short historical validation period, and it
-    validates the real data contract before larger production exports are attempted. The feature
-    arrays are built from Sentinel-1 scenes on or before the observation timestamp only; the label
-    is created from the future GFD reference at t+7 and is aligned to the same 250 m grid.
+    The Sentinel-1 collection is filtered to a rolling window ending at (and including)
+    `observation_timestamp`, spanning `max_lookback_days` back from it. This makes the function
+    usable for both a fixed historical date (training against a known past event) and "now"
+    (real-time inference) — it never hardcodes a specific calendar date range.
     """
     import ee  # type: ignore
 
-    settings = settings or get_settings()
-    grid = grid_spec or GridSpec()
     roi = ee.Geometry(aoi_geometry)
     sample_roi = ee.Geometry(sample_region) if sample_region is not None else roi
     target_roi = sample_roi.transform(grid.crs, maxError=1)
-    training_projection = ee.Projection(grid.crs).atScale(grid.scale_m)
 
     estimated_pixels = _estimate_sample_pixels(target_roi, crs=grid.crs, scale_m=grid.scale_m)
     if estimated_pixels > 262_144:
@@ -330,20 +325,27 @@ def build_real_training_sample(
             f"for ROI {sample_roi.bounds().getInfo()} at {grid.scale_m} m. Use a smaller ROI."
         )
 
+    obs_dt = _as_datetime(observation_timestamp)
+    obs_ms = _as_utc_ms(obs_dt)
+    window_start = (obs_dt - timedelta(days=max_lookback_days)).strftime("%Y-%m-%d")
+    window_end = (obs_dt + timedelta(days=1)).strftime("%Y-%m-%d")
+
     collection = (
         ee.ImageCollection(settings.satellite_collection)
         .filterBounds(roi)
-        .filterDate("2017-08-01", "2017-08-30")
+        .filterDate(window_start, window_end)
         .filter(ee.Filter.eq("instrumentMode", settings.instrument_mode))
         .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VV"))
         .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
         .sort("system:time_start")
     )
 
-    obs_dt = _as_datetime(observation_timestamp)
-    obs_ms = _as_utc_ms(obs_dt)
     valid_collection = collection.filter(ee.Filter.lte("system:time_start", obs_ms)).sort("system:time_start", False)
-    selected = valid_collection.limit(max(min_scene_count * 4, min_scene_count + 6)).getInfo().get("features", [])
+    # A Sentinel-1 swath is far narrower than the AOI, so most scenes that intersect the
+    # broad AOI do not actually cover a small sample ROI. The candidate pool must be wide
+    # enough that enough of them still do after the per-scene intersects() filter below.
+    candidate_pool_size = max(min_scene_count * 15, 30)
+    selected = valid_collection.limit(candidate_pool_size).getInfo().get("features", [])
     if len(selected) < min_scene_count:
         raise ValueError(
             f"Need at least {min_scene_count} Sentinel-1 scenes before observation {obs_dt.isoformat()}, found {len(selected)}."
@@ -361,7 +363,7 @@ def build_real_training_sample(
             continue
         scene_image = ee.Image(ee.ImageCollection(settings.satellite_collection).filter(ee.Filter.eq("system:index", scene_id)).first())
         scene_geometry = ee.Geometry(scene_image.geometry())
-        if not scene_geometry.intersects(sample_roi).getInfo():
+        if not scene_geometry.intersects(sample_roi, ee.ErrorMargin(1)).getInfo():
             continue
         vv_values = np.asarray(scene_image.select("VV").sampleRectangle(sample_roi, defaultValue=0).get("VV").getInfo(), dtype=np.float32)
         vh_values = np.asarray(scene_image.select("VH").sampleRectangle(sample_roi, defaultValue=0).get("VH").getInfo(), dtype=np.float32)
@@ -451,6 +453,137 @@ def build_real_training_sample(
         if value is None or np.asarray(value).ndim != 2:
             continue
         feature_grid[name] = np.asarray(value, dtype=np.float32)
+
+    return {
+        "feature_grid": feature_grid,
+        "roi": roi,
+        "sample_roi": sample_roi,
+        "target_roi": target_roi,
+        "obs_dt": obs_dt,
+        "target_dt": target_dt,
+        "scene_ids": scene_ids,
+        "scene_timestamps": scene_timestamps,
+        "selected_unique": selected_unique,
+    }
+
+
+def build_live_feature_grid(
+    aoi_geometry: Any,
+    observation_timestamp: Any,
+    *,
+    settings: Any | None = None,
+    sample_region: Any | None = None,
+    grid_spec: GridSpec | None = None,
+    min_scene_count: int = 3,
+    max_lookback_days: int = 30,
+) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+    """Build a real, label-free feature grid for live inference.
+
+    Unlike `build_real_training_sample`, this never touches the GFD historical reference: there is
+    no future ground truth for "now", so live inference can only ever provide the model's input
+    features. The Sentinel-1 observation window is a rolling lookback ending at
+    `observation_timestamp` (typically the current time), not a fixed historical date range.
+    """
+    settings = settings or get_settings()
+    grid = grid_spec or GridSpec()
+
+    result = _select_and_build_feature_grid(
+        aoi_geometry,
+        observation_timestamp,
+        settings=settings,
+        sample_region=sample_region,
+        grid=grid,
+        min_scene_count=min_scene_count,
+        max_lookback_days=max_lookback_days,
+    )
+
+    feature_grid = result["feature_grid"]
+    obs_dt: datetime = result["obs_dt"]
+    target_dt: datetime = result["target_dt"]
+    selected_unique = result["selected_unique"]
+
+    nan_count = 0
+    inf_count = 0
+    ranges: dict[str, tuple[float, float]] = {}
+    for key, array in feature_grid.items():
+        arr = np.asarray(array, dtype=np.float32)
+        nan_count += int(np.count_nonzero(~np.isfinite(arr)))
+        inf_count += int(np.count_nonzero(np.isinf(arr)))
+        ranges[key] = (float(np.nanmin(arr)), float(np.nanmax(arr))) if arr.size else (0.0, 0.0)
+
+    ordered_scene_ids = [str(item["id"]) for item in selected_unique]
+    ordered_scene_timestamps = [item["timestamp"] for item in selected_unique]
+    latest_scene_timestamp = ordered_scene_timestamps[-1] if ordered_scene_timestamps else None
+    now_utc = datetime.now(timezone.utc)
+    latest_scene_dt = _as_datetime(latest_scene_timestamp) if latest_scene_timestamp else None
+    processing_lag_seconds = (
+        int((now_utc - latest_scene_dt.replace(tzinfo=timezone.utc)).total_seconds())
+        if latest_scene_dt is not None
+        else None
+    )
+
+    metadata = {
+        "observation_timestamp": obs_dt.isoformat(),
+        "target_timestamp": target_dt.isoformat(),
+        "crs": grid.crs,
+        "feature_grid_scale_m": grid.scale_m,
+        "feature_dimensions": feature_grid["vv_t"].shape if "vv_t" in feature_grid else None,
+        "selected_scene_ids": ordered_scene_ids,
+        "selected_scene_timestamps": ordered_scene_timestamps,
+        "latest_scene_timestamp": latest_scene_timestamp,
+        "prediction_timestamp": now_utc.isoformat(),
+        "processing_lag_seconds": processing_lag_seconds,
+        "nan_count": nan_count,
+        "inf_count": inf_count,
+        "feature_ranges": ranges,
+        "target_roi": result["target_roi"],
+        "sample_roi": result["sample_roi"],
+    }
+    return feature_grid, metadata
+
+
+def build_real_training_sample(
+    aoi_geometry: Any,
+    observation_timestamp: Any,
+    *,
+    settings: Any | None = None,
+    sample_region: Any | None = None,
+    grid_spec: GridSpec | None = None,
+    min_scene_count: int = 3,
+    max_lookback_days: int = 30,
+    gfd_start_date: str = "2017-08-10",
+    gfd_end_date: str = "2017-08-27",
+) -> tuple[dict[str, np.ndarray], np.ndarray, dict[str, Any]]:
+    """Build a small, leakage-safe real Earth Engine training sample.
+
+    The sample intentionally uses a tiny ROI and a short historical validation period, and it
+    validates the real data contract before larger production exports are attempted. The feature
+    arrays are built from Sentinel-1 scenes on or before the observation timestamp only; the label
+    is created from the future GFD reference at t+7 and is aligned to the same 250 m grid.
+    """
+    import ee  # type: ignore
+
+    settings = settings or get_settings()
+    grid = grid_spec or GridSpec()
+
+    selection = _select_and_build_feature_grid(
+        aoi_geometry,
+        observation_timestamp,
+        settings=settings,
+        sample_region=sample_region,
+        grid=grid,
+        min_scene_count=min_scene_count,
+        max_lookback_days=max_lookback_days,
+    )
+    feature_grid = selection["feature_grid"]
+    roi = selection["roi"]
+    target_roi = selection["target_roi"]
+    obs_dt = selection["obs_dt"]
+    target_dt = selection["target_dt"]
+    scene_ids = selection["scene_ids"]
+    scene_timestamps = selection["scene_timestamps"]
+    selected_unique = selection["selected_unique"]
+    obs_ms = _as_utc_ms(obs_dt)
 
     gfd_reference = (
         ee.ImageCollection("GLOBAL_FLOOD_DB/MODIS_EVENTS/V1")
@@ -543,6 +676,7 @@ __all__ = [
     "GridSpec",
     "SamplingDiagnostics",
     "aggregate_feature_to_label_grid",
+    "build_live_feature_grid",
     "build_real_training_sample",
     "select_temporal_observation_scenes",
 ]

@@ -14,6 +14,13 @@ class RiskAlert(BaseModel):
     threshold: float = 0.7
 
 
+class RiskBounds(BaseModel):
+    west: float
+    south: float
+    east: float
+    north: float
+
+
 class RiskResponse(BaseModel):
     predictionId: str
     regionId: str = "bihar-nepal"
@@ -21,6 +28,7 @@ class RiskResponse(BaseModel):
     risk: RiskSummary
     resolutionMeters: float
     crs: str
+    bounds: RiskBounds | None = None
     satellite: str = "Sentinel-1"
     sourcePassTimestamp: str
     predictionTimestamp: str
@@ -30,3 +38,4 @@ class RiskResponse(BaseModel):
     modelVersion: str
     alert: RiskAlert
     rasterUrl: str | None = None
+    previewUrl: str | None = None
