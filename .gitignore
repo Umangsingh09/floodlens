@@ -55,3 +55,6 @@ ai/data/*
 *.ckpt
 *.onnx
 *.parquet
+*.joblib
+ai/outputs/
+ai/models/artifacts/

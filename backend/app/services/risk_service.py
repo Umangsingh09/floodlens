@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from app.schemas.risk import RiskAlert, RiskResponse, RiskSummary
+from app.schemas.risk import RiskAlert, RiskBounds, RiskResponse, RiskSummary
+
+logger = logging.getLogger(__name__)
 
 
 class RiskService:
@@ -21,12 +24,18 @@ class RiskService:
 
     def latest_prediction(self) -> RiskResponse | None:
         if not self.output_dir.exists():
+            logger.warning("Prediction output directory does not exist: %s", self.output_dir)
             return None
         candidates = sorted(p for p in self.output_dir.iterdir() if p.is_dir())
         if not candidates:
+            logger.warning("No prediction directories found under: %s", self.output_dir)
             return None
         latest = candidates[-1]
-        metadata = self.load_metadata(latest.name)
+        try:
+            metadata = self.load_metadata(latest.name)
+        except (FileNotFoundError, json.JSONDecodeError) as exc:
+            logger.error("Failed to load latest prediction metadata for '%s': %s", latest.name, exc)
+            return None
         return self._build_response(latest.name, metadata)
 
     def _build_response(self, prediction_id: str, metadata: dict) -> RiskResponse:
@@ -40,6 +49,12 @@ class RiskService:
         level = self.calculate_alert(summary.mean, threshold)
         alert = RiskAlert(level=level, threshold=threshold)
 
+        bounds_raw = metadata.get("bounds")
+        bounds = RiskBounds(**bounds_raw) if bounds_raw else None
+
+        raster_path = self.output_dir / prediction_id / "risk_raster.tif"
+        has_raster = raster_path.exists()
+
         return RiskResponse(
             predictionId=prediction_id,
             regionId=metadata.get("regionId", "bihar-nepal"),
@@ -47,6 +62,7 @@ class RiskService:
             risk=summary,
             resolutionMeters=float(metadata.get("resolutionMeters", 10.0)),
             crs=metadata.get("crs", "EPSG:4326"),
+            bounds=bounds,
             satellite=metadata.get("satellite", "Sentinel-1"),
             sourcePassTimestamp=metadata.get("sourcePassTimestamp", datetime.now(timezone.utc).isoformat()),
             predictionTimestamp=metadata.get("predictionTimestamp", datetime.now(timezone.utc).isoformat()),
@@ -55,7 +71,8 @@ class RiskService:
             modelId=metadata.get("modelId", "logistic-regression"),
             modelVersion=metadata.get("modelVersion", "0.1.0"),
             alert=alert,
-            rasterUrl=f"/api/risk/{prediction_id}/raster",
+            rasterUrl=f"/api/risk/{prediction_id}/raster" if has_raster else None,
+            previewUrl=f"/api/risk/{prediction_id}/preview.png" if has_raster else None,
         )
 
     @staticmethod
