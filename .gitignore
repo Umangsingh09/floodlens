@@ -57,4 +57,9 @@ ai/data/*
 *.parquet
 *.joblib
 ai/outputs/
-ai/models/artifacts/
+
+# The small baseline model artifact IS committed: the deployed backend has no
+# guaranteed persistent disk, so it must ship in the repo rather than be
+# regenerated on every cold start (regenerating needs live GEE + training time).
+!ai/models/artifacts/*.joblib
+!ai/models/artifacts/*.json

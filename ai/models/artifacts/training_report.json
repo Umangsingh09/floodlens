@@ -1,0 +1,37 @@
+{
+  "model_version": "0.1.0-baseline",
+  "model_type": "logistic_regression",
+  "feature_names": [
+    "delta_vh",
+    "delta_vv",
+    "elevation",
+    "slope",
+    "vh_t",
+    "vh_t_1",
+    "vv_t",
+    "vv_t_1",
+    "water_baseline",
+    "water_change",
+    "water_current",
+    "water_persistence",
+    "water_previous",
+    "water_trend"
+  ],
+  "training_rows": 323,
+  "positive_rows": 256,
+  "negative_rows": 67,
+  "held_out_test_rows": 81,
+  "held_out_test_auc": 0.7325367647058824,
+  "held_out_test_accuracy": 0.7160493827160493,
+  "training_data_source": "real Sentinel-1 GRD + GFD DFO 4507 (Aug 2017), Bihar-Nepal AOI",
+  "not_real_time": true,
+  "observation_timestamp": "2017-08-21T00:00:00",
+  "target_timestamp": "2017-08-28T00:00:00",
+  "selected_scene_ids": [
+    "S1A_IW_GRDH_1SDV_20170808T122137_20170808T122202_017832_01DE48_D7D6",
+    "S1A_IW_GRDH_1SDV_20170811T001139_20170811T001204_017868_01DF62_43D9",
+    "S1A_IW_GRDH_1SDV_20170820T122138_20170820T122203_018007_01E393_768A"
+  ],
+  "grid_crs": "EPSG:32645",
+  "grid_scale_m": 250.0
+}

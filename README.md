@@ -111,6 +111,11 @@ Runs at `http://localhost:8000`. Verify with:
 curl http://localhost:8000/api/health
 ```
 
+## Deployment
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for deploying the frontend to Vercel and the
+backend to Render, including the Earth Engine service-account setup a deployed backend needs.
+
 ## Team
 
 - AI/geospatial research and model development: Hariom

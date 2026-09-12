@@ -33,6 +33,11 @@ def _run_scheduled_refresh() -> None:
         logger.exception("Scheduled risk refresh failed")
 
 
+def _has_any_prediction() -> bool:
+    output_dir = Path(settings.output_dir)
+    return output_dir.exists() and any(p.is_dir() for p in output_dir.iterdir())
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     global _scheduler
@@ -48,6 +53,13 @@ async def lifespan(_: FastAPI):
         )
         _scheduler.start()
         logger.info("Risk refresh scheduler started (every %sh)", settings.risk_refresh_interval_hours)
+
+        # A deployed host has no guaranteed persistent disk, so a cold start can come up with an
+        # empty ai/outputs/. Rather than leave /api/risk/latest returning 404 for up to a full
+        # refresh interval, run one bootstrap prediction immediately in the background.
+        if not _has_any_prediction():
+            _scheduler.add_job(_run_scheduled_refresh, id="risk_refresh_bootstrap")
+            logger.info("No existing predictions found; running a bootstrap prediction now")
     yield
     if _scheduler is not None:
         _scheduler.shutdown(wait=False)

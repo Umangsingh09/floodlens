@@ -24,6 +24,7 @@ import rasterio
 from rasterio.transform import from_bounds
 
 from ai.config import get_settings
+from ai.gee_auth import initialize_earth_engine
 from ai.models.risk_model import LogisticRiskModel
 from ai.preprocessing.real_gee_sampling import GridSpec, build_live_feature_grid
 
@@ -52,7 +53,7 @@ def run_prediction(*, output_root: Path | None = None) -> dict[str, Any]:
 
     settings = get_settings()
     logger.info("Starting live risk prediction (project=%s)", settings.earthengine_project)
-    ee.Initialize(project=settings.earthengine_project)
+    initialize_earth_engine(project=settings.earthengine_project)
 
     model = LogisticRiskModel.load(str(MODEL_PATH))
     if not model.feature_names:
