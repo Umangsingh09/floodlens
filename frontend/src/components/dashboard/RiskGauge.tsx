@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ALERT_LABELS, formatPercent, riskColor } from '../../lib/format';
+import { ALERT_LABELS, normalizeAlertLevel, formatPercent, tierColor } from '../../lib/format';
 import styles from './RiskGauge.module.css';
 
 interface RiskGaugeProps {
@@ -18,7 +18,9 @@ export function RiskGauge({ value, alertLevel }: RiskGaugeProps) {
     return () => cancelAnimationFrame(frame);
   }, [value]);
 
-  const color = riskColor(value);
+  // Colored by the backend's own alert level, not re-derived from the raw value — so the
+  // arc color always agrees with the label sitting right beside it.
+  const color = tierColor(normalizeAlertLevel(alertLevel));
   const offset = CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, animated)));
 
   return (

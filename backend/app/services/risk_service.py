@@ -76,6 +76,7 @@ class RiskService:
             gridUrl=f"/api/risk/{prediction_id}/grid" if has_raster else None,
             observationWindowScenes=metadata.get("observationWindowScenes"),
             gridShape=metadata.get("gridShape"),
+            note=metadata.get("note"),
         )
 
     def list_history(self, *, limit: int = 20) -> list[RiskHistoryPoint]:

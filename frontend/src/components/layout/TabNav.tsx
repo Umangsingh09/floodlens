@@ -1,10 +1,13 @@
 import styles from './TabNav.module.css';
 
-export type TabKey = 'overview' | 'history';
+export type TabKey = 'dashboard' | 'map' | 'events' | 'history' | 'about';
 
 const TABS: Array<{ key: TabKey; label: string }> = [
-  { key: 'overview', label: 'Overview' },
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'map', label: 'Risk Map' },
+  { key: 'events', label: 'Events' },
   { key: 'history', label: 'History' },
+  { key: 'about', label: 'About/Data' },
 ];
 
 interface TabNavProps {

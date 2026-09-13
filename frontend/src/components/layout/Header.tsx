@@ -1,3 +1,4 @@
+import { useBackendStatus } from '../../hooks/useBackendStatus';
 import { formatRelativeTime } from '../../lib/format';
 import type { RegionInfo } from '../../types/region';
 import type { RiskSnapshot } from '../../types/risk';
@@ -21,7 +22,16 @@ function Mark() {
   );
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  checking: 'Checking…',
+  online: 'Backend online',
+  offline: 'Backend unreachable',
+};
+
 export function Header({ region, risk, refreshing, onRefresh }: HeaderProps) {
+  // A real, polled health check — never a simulated/hardcoded "online" badge.
+  const backendStatus = useBackendStatus();
+
   return (
     <header className={styles.header}>
       <div className={styles.brand}>
@@ -35,6 +45,16 @@ export function Header({ region, risk, refreshing, onRefresh }: HeaderProps) {
       </div>
 
       <div className={styles.actions}>
+        <span
+          className={styles.status}
+          data-status={backendStatus}
+          title={STATUS_LABEL[backendStatus]}
+          aria-label={STATUS_LABEL[backendStatus]}
+        >
+          <span className={styles.statusDot} />
+          <span className={styles.statusLabel}>{STATUS_LABEL[backendStatus]}</span>
+        </span>
+
         <span className={styles.synced}>
           {risk ? `Synced ${formatRelativeTime(risk.predictionTimestamp)}` : ' '}
         </span>
