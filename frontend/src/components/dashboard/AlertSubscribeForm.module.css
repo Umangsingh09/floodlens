@@ -1,0 +1,128 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 420px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-dim);
+}
+
+.field input[type='url'] {
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+.field input[type='url']:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.hint {
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--color-text-faint);
+}
+
+.thresholdRow {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.thresholdRow input[type='range'] {
+  flex: 1;
+  accent-color: var(--color-accent);
+}
+
+.thresholdValue {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  min-width: 3ch;
+  text-align: right;
+}
+
+.submit {
+  align-self: flex-start;
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.4rem;
+  background: var(--color-accent);
+  color: #05070d;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #d03b3b;
+}
+
+.count {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--color-text-faint);
+}
+
+.subscribed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.status {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-dim);
+}
+
+.unsubscribe {
+  appearance: none;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  background: var(--color-surface);
+  color: var(--color-text-dim);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.unsubscribe:hover:not(:disabled) {
+  border-color: #d03b3b;
+  color: #d03b3b;
+}
+
+.unsubscribe:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

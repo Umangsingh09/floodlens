@@ -12,9 +12,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.alerts import alert_service
+from app.api.alerts import router as alerts_router
 from app.api.events import router as events_router
 from app.api.health import router as health_router
 from app.api.region import router as region_router
+from app.api.risk import risk_service
 from app.api.risk import router as risk_router
 from app.core.config import settings
 
@@ -29,6 +32,9 @@ def _run_scheduled_refresh() -> None:
 
     try:
         run_prediction()
+        latest = risk_service.latest_prediction()
+        if latest is not None:
+            alert_service.check_and_notify(latest)
     except Exception:  # noqa: BLE001 - a failed scheduled run must never crash the process
         logger.exception("Scheduled risk refresh failed")
 
@@ -79,3 +85,4 @@ app.include_router(health_router, prefix="/api")
 app.include_router(risk_router, prefix="/api")
 app.include_router(region_router, prefix="/api")
 app.include_router(events_router, prefix="/api")
+app.include_router(alerts_router, prefix="/api")

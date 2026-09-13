@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../lib/constants';
+import type { AlertSubscription, AlertSubscriptionCount } from '../types/alerts';
 import type { HistoricalEvent } from '../types/events';
 import type { RegionInfo } from '../types/region';
 import type { RiskGrid, RiskHistoryPoint, RiskSnapshot } from '../types/risk';
@@ -65,4 +66,23 @@ export function fetchRiskGrid(path: string): Promise<RiskGrid> {
 export function resolveAssetUrl(path: string | null | undefined): string | null {
   if (!path) return null;
   return `${API_BASE_URL}${path}`;
+}
+
+export function subscribeToAlerts(webhookUrl: string, threshold: number): Promise<AlertSubscription> {
+  return request<AlertSubscription>('/api/alerts/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ webhookUrl, threshold }),
+  });
+}
+
+export async function unsubscribeFromAlerts(subscriptionId: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/alerts/${subscriptionId}`, { method: 'DELETE' });
+  if (!response.ok && response.status !== 404) {
+    throw new ApiError(`/api/alerts/${subscriptionId} responded with ${response.status}`, response.status);
+  }
+}
+
+export function fetchAlertSubscriptionCount(): Promise<AlertSubscriptionCount> {
+  return request<AlertSubscriptionCount>('/api/alerts/count');
 }

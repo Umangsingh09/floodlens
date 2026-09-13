@@ -1,3 +1,4 @@
+import { AlertSubscribeForm } from '../components/dashboard/AlertSubscribeForm';
 import { BellIcon, GridIcon, SatelliteIcon, ShieldIcon } from '../components/icons/Icons';
 import type { HistoricalEvent } from '../types/events';
 import type { RegionInfo } from '../types/region';
@@ -127,15 +128,17 @@ export function AboutPage({ region, risk, events }: AboutPageProps) {
       <section className={styles.roadmap}>
         <span className={styles.badge}>
           <BellIcon />
-          Coming soon
+          Alerts
         </span>
-        <h2 className={styles.roadmapHeading}>Threshold-based alerting isn't connected yet</h2>
+        <h2 className={styles.roadmapHeading}>Get notified when risk crosses a threshold</h2>
         <p className={styles.cardNote}>
-          No alerts are active, scheduled, or being sent today. Once connected, this will notify
-          subscribers when a region's predicted mean risk crosses a configured threshold — the
-          same threshold already tracked per prediction (see the alert level shown on Dashboard
-          and Risk Map).
+          Real, working, but deliberately minimal: there's no email/SMS provider configured for
+          this deployment, so notifications go out as a webhook POST — paste a Slack/Discord
+          incoming webhook URL, a Zapier/IFTTT catch hook, or any endpoint you control. You'll be
+          notified once when mean risk first crosses your threshold, not on every refresh while it
+          stays elevated.
         </p>
+        <AlertSubscribeForm />
       </section>
     </div>
   );

@@ -5,6 +5,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, Response
 
+from app.api.alerts import alert_service
 from app.core.config import settings
 from app.schemas.risk import RiskGridResponse, RiskHistoryPoint, RiskResponse
 from app.services.raster_service import read_risk_grid, render_risk_preview_png, resolve_raster_path
@@ -44,6 +45,7 @@ def refresh_risk() -> RiskResponse:
     prediction = risk_service.latest_prediction()
     if prediction is None:
         raise HTTPException(status_code=502, detail="Refresh ran but produced no readable prediction artifacts.")
+    alert_service.check_and_notify(prediction)
     return prediction
 
 
