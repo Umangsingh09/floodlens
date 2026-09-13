@@ -74,3 +74,11 @@ export function BellIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function DropletIcon({ className }: IconProps) {
+  return (
+    <svg {...common} className={className} aria-hidden="true">
+      <path d="M12 3c3 4 6 7.5 6 11a6 6 0 0 1-12 0c0-3.5 3-7 6-11z" />
+    </svg>
+  );
+}

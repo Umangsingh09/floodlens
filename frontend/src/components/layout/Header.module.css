@@ -120,6 +120,11 @@
 .refreshButton:hover:not(:disabled) {
   color: var(--color-accent);
   border-color: var(--color-accent);
+  transform: scale(1.06);
+}
+
+.refreshButton:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
 .refreshButton:disabled {

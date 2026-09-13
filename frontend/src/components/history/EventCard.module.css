@@ -7,6 +7,12 @@
   box-shadow: var(--shadow-panel);
   max-width: 560px;
   overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-panel-hover);
 }
 
 .card::before {

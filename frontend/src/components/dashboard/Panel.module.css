@@ -9,6 +9,17 @@
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-panel);
   overflow: hidden;
+  transition: border-color 0.25s ease;
+}
+
+/* A large container (often holding a map or chart) gets a quieter cue than a small stat
+   card's full lift — just a slightly stronger border and a brighter accent bar. */
+.panel:hover {
+  border-color: var(--color-border-strong);
+}
+
+.panel:hover::before {
+  opacity: 1;
 }
 
 .panel::before {
@@ -20,6 +31,7 @@
   height: 2px;
   background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
   opacity: 0.7;
+  transition: opacity 0.25s ease;
 }
 
 .panel[data-span='narrow'] {

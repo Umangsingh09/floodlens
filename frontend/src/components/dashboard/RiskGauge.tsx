@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { ALERT_LABELS, normalizeAlertLevel, formatPercent, tierColor } from '../../lib/format';
 import styles from './RiskGauge.module.css';
 
@@ -24,7 +24,7 @@ export function RiskGauge({ value, alertLevel }: RiskGaugeProps) {
   const offset = CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, animated)));
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} style={{ '--gauge-glow': color } as CSSProperties}>
       <svg viewBox="0 0 120 120" className={styles.svg} role="img" aria-label={`Mean risk ${formatPercent(value)}`}>
         <circle cx="60" cy="60" r={RADIUS} className={styles.track} />
         <circle
