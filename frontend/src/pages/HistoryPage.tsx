@@ -1,37 +1,74 @@
-import { EventCard } from '../components/history/EventCard';
-import type { HistoricalEvent } from '../types/events';
+import { Panel } from '../components/dashboard/Panel';
+import { RiskTrend } from '../components/dashboard/RiskTrend';
+import { ClockIcon } from '../components/icons/Icons';
+import { formatPercent, formatShortDate, formatTime, normalizeAlertLevel, tierColor, tierEmoji, tierLabel } from '../lib/format';
+import type { RiskHistoryPoint } from '../types/risk';
 import styles from './HistoryPage.module.css';
 
 interface HistoryPageProps {
-  events: HistoricalEvent[];
+  points: RiskHistoryPoint[];
   loading: boolean;
 }
 
-export function HistoryPage({ events, loading }: HistoryPageProps) {
+export function HistoryPage({ points, loading }: HistoryPageProps) {
+  const ordered = [...points].reverse();
+
   return (
     <div className={styles.wrap}>
       <div className={styles.pageHead}>
-        <span className={styles.eyebrow}>Validation record</span>
-        <h1 className={styles.heading}>Checked against real historical floods</h1>
+        <span className={styles.eyebrow}>Prediction history</span>
+        <h1 className={styles.heading}>Mean risk over past observation passes</h1>
         <p className={styles.lede}>
-          Predictions are only trustworthy if they line up with what actually happened. Each
-          entry below is a real, satellite-derived flood event used to validate spatial output —
-          never used to train the model itself.
+          Every entry is a real inference run — either the scheduled background refresh or a
+          manually triggered one — recorded with the same alert level shown live on the dashboard.
         </p>
       </div>
 
       {loading ? (
         <div className={styles.skeleton} />
-      ) : events.length === 0 ? (
+      ) : points.length === 0 ? (
         <div className={styles.empty}>
-          <p>No validated reference events yet.</p>
+          <p>No prediction runs recorded yet.</p>
         </div>
       ) : (
-        <div className={styles.page}>
-          {events.map((event) => (
-            <EventCard key={event.dfoId} event={event} />
-          ))}
-        </div>
+        <>
+          <Panel icon={<ClockIcon />} title="Trend" subtitle={`${points.length} readings`} span="full">
+            <RiskTrend points={points} variant="full" />
+          </Panel>
+
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Prediction</th>
+                  <th>Mean risk</th>
+                  <th>Alert level</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ordered.map((point) => {
+                  const tier = normalizeAlertLevel(point.alertLevel);
+                  return (
+                    <tr key={point.predictionId}>
+                      <td>
+                        <span className={styles.timestamp}>
+                          {formatShortDate(point.predictionTimestamp)} · {formatTime(point.predictionTimestamp)}
+                        </span>
+                        <span className={styles.predictionId}>{point.predictionId}</span>
+                      </td>
+                      <td className={styles.mean}>{formatPercent(point.mean)}</td>
+                      <td>
+                        <span className={styles.alertBadge} style={{ color: tierColor(tier), borderColor: tierColor(tier) }}>
+                          {tierEmoji(tier)} {tierLabel(tier)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

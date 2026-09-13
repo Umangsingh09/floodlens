@@ -3,12 +3,39 @@ import type { HistoricalEvent } from '../types/events';
 import type { RegionInfo } from '../types/region';
 import type { RiskGrid, RiskHistoryPoint, RiskSnapshot } from '../types/risk';
 
+/** Thrown by `request()` — carries the HTTP status so callers can tell "not found yet"
+ *  (404, e.g. no prediction has run) apart from a real backend/network failure. */
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, init);
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, init);
+  } catch {
+    // status 0 marks a network-level failure (backend unreachable, CORS, offline).
+    throw new ApiError(`${path} could not be reached`, 0);
+  }
   if (!response.ok) {
-    throw new Error(`${path} responded with ${response.status}`);
+    throw new ApiError(`${path} responded with ${response.status}`, response.status);
   }
   return response.json() as Promise<T>;
+}
+
+export async function checkBackendHealth(): Promise<boolean> {
+  try {
+    await request('/api/health');
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function fetchRegion(): Promise<RegionInfo> {

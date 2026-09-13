@@ -48,6 +48,53 @@
   gap: 0.85rem;
 }
 
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.statusDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--color-text-faint);
+}
+
+.status[data-status='online'] .statusDot {
+  background: #0ca30c;
+}
+
+.status[data-status='offline'] .statusDot {
+  background: #d03b3b;
+}
+
+.status[data-status='checking'] .statusDot {
+  background: #fab219;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.statusLabel {
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  font-weight: 500;
+}
+
+@media (max-width: 720px) {
+  .statusLabel {
+    display: none;
+  }
+}
+
 .synced {
   font-size: 0.76rem;
   color: var(--color-text-faint);

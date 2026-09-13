@@ -1,12 +1,12 @@
 .wrap {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 1.5rem;
 }
 
 .pageHead {
   padding: 0.5rem 0.25rem 0.25rem;
-  max-width: 700px;
+  max-width: 780px;
 }
 
 .eyebrow {
@@ -32,12 +32,6 @@
   line-height: 1.55;
 }
 
-.page {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
 .empty {
   padding: 4rem 1rem;
   text-align: center;
@@ -45,9 +39,75 @@
 }
 
 .skeleton {
-  height: 260px;
-  max-width: 560px;
+  height: 420px;
   border-radius: 20px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
+}
+
+.tableWrap {
+  border-radius: 18px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-panel);
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-faint);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.8rem 1.1rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.timestamp {
+  display: block;
+  color: var(--color-text);
+}
+
+.predictionId {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+}
+
+.mean {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.alertBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
 }

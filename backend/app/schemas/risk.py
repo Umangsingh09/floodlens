@@ -42,6 +42,7 @@ class RiskResponse(BaseModel):
     gridUrl: str | None = None
     observationWindowScenes: list[str] | None = None
     gridShape: list[int] | None = None
+    note: str | None = None
 
 
 class RiskHistoryPoint(BaseModel):

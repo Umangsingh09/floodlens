@@ -1,0 +1,154 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.pageHead {
+  padding: 0.5rem 0.25rem 0.25rem;
+  max-width: 780px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  margin-bottom: 0.6rem;
+}
+
+.heading {
+  font-size: clamp(1.6rem, 3.2vw, 2.3rem);
+  line-height: 1.15;
+  margin-bottom: 0.6rem;
+}
+
+.lede {
+  margin: 0;
+  color: var(--color-text-dim);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 780px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.4rem 1.5rem;
+  border-radius: 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
+  opacity: 0.7;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-accent);
+}
+
+.cardHead h2 {
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.facts dt {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-faint);
+}
+
+.facts dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.88rem;
+  color: var(--color-text);
+}
+
+.formula {
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.formula code {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--color-text-dim);
+  white-space: nowrap;
+}
+
+.cardNote {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--color-text-faint);
+}
+
+.roadmap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.5rem 1.6rem;
+  border-radius: 18px;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border-strong);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text-faint) 16%, transparent);
+  color: var(--color-text-dim);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.roadmapHeading {
+  font-size: 1.05rem;
+}

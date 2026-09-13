@@ -4,10 +4,13 @@ import { PipelineSteps } from '../components/dashboard/PipelineSteps';
 import { RiskGauge } from '../components/dashboard/RiskGauge';
 import { RiskTrend } from '../components/dashboard/RiskTrend';
 import { StatTile } from '../components/dashboard/StatTile';
+import { SummaryCards } from '../components/dashboard/SummaryCards';
 import { ClockIcon, GridIcon, SatelliteIcon, TrendIcon } from '../components/icons/Icons';
 import { RiskMap } from '../components/map/RiskMap';
+import { useRiskGrid } from '../hooks/useRiskGrid';
 import { useRiskHistory } from '../hooks/useRiskHistory';
 import { formatPercent } from '../lib/format';
+import type { HistoricalEvent } from '../types/events';
 import type { RegionInfo } from '../types/region';
 import type { RiskSnapshot } from '../types/risk';
 import styles from './DashboardPage.module.css';
@@ -17,10 +20,13 @@ interface DashboardPageProps {
   risk: RiskSnapshot | null;
   regionLoading: boolean;
   riskLoading: boolean;
+  events: HistoricalEvent[];
+  eventsLoading: boolean;
 }
 
-export function DashboardPage({ region, risk, regionLoading, riskLoading }: DashboardPageProps) {
-  const history = useRiskHistory(risk?.predictionId);
+export function DashboardPage({ region, risk, regionLoading, riskLoading, events, eventsLoading }: DashboardPageProps) {
+  const { points: history } = useRiskHistory(risk?.predictionId);
+  const grid = useRiskGrid(risk?.gridUrl);
 
   if (regionLoading || riskLoading) {
     return (
@@ -51,6 +57,8 @@ export function DashboardPage({ region, risk, regionLoading, riskLoading }: Dash
           {risk?.resolutionMeters ?? 250}m grid.
         </p>
       </div>
+
+      <SummaryCards risk={risk} grid={grid} eventCount={events.length} eventsLoading={eventsLoading} />
 
       {risk ? (
         <>

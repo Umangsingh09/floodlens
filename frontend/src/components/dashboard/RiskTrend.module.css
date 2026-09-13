@@ -1,4 +1,5 @@
 .wrap {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -8,6 +9,42 @@
   width: 100%;
   height: 84px;
   display: block;
+  overflow: visible;
+}
+
+.wrap[data-variant='full'] .svg {
+  height: 220px;
+}
+
+.point {
+  cursor: pointer;
+  transition: r 0.15s;
+}
+
+.tooltip {
+  position: absolute;
+  transform: translate(-50%, -125%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-panel);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.tooltip strong {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+
+.tooltip span {
+  color: var(--color-text-faint);
 }
 
 .range {

@@ -2,18 +2,29 @@ import { useEffect, useState } from 'react';
 import { fetchRiskHistory } from '../services/api';
 import type { RiskHistoryPoint } from '../types/risk';
 
-export function useRiskHistory(refreshKey?: string): RiskHistoryPoint[] {
-  const [points, setPoints] = useState<RiskHistoryPoint[]>([]);
+interface RiskHistoryState {
+  points: RiskHistoryPoint[];
+  loading: boolean;
+}
+
+export function useRiskHistory(refreshKey?: string, limit = 20): RiskHistoryState {
+  const [state, setState] = useState<RiskHistoryState>({ points: [], loading: true });
 
   useEffect(() => {
     let cancelled = false;
-    fetchRiskHistory().then((data) => {
-      if (!cancelled) setPoints(data);
-    });
+    // Deliberately doesn't flip `loading` back to true on refetch (e.g. after a manual
+    // refresh) — keep showing the last known points rather than flashing a skeleton.
+    fetchRiskHistory(limit)
+      .then((points) => {
+        if (!cancelled) setState({ points, loading: false });
+      })
+      .catch(() => {
+        if (!cancelled) setState({ points: [], loading: false });
+      });
     return () => {
       cancelled = true;
     };
-  }, [refreshKey]);
+  }, [refreshKey, limit]);
 
-  return points;
+  return state;
 }

@@ -32,6 +32,7 @@ export interface RiskSnapshot {
   gridUrl: string | null;
   observationWindowScenes: string[] | null;
   gridShape: [number, number] | null;
+  note: string | null;
 }
 
 export interface RiskHistoryPoint {
