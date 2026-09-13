@@ -24,7 +24,7 @@ import rasterio
 from rasterio.transform import from_bounds
 
 from ai.config import get_settings
-from ai.earthengine_auth import initialize_earth_engine
+from ai.gee_auth import initialize_earth_engine
 from ai.models.risk_model import LogisticRiskModel
 from ai.preprocessing.real_gee_sampling import GridSpec, build_live_feature_grid
 

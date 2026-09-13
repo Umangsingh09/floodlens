@@ -20,7 +20,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 from ai.config import get_settings
-from ai.earthengine_auth import initialize_earth_engine
+from ai.gee_auth import initialize_earth_engine
 from ai.models.risk_model import LogisticRiskModel
 from ai.preprocessing.real_gee_sampling import GridSpec, build_real_training_sample
 

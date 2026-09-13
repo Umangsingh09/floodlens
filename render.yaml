@@ -6,20 +6,21 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
     envVars:
       # Set for real in the Render dashboard — never commit real values here.
-      - key: EARTHENGINE_PROJECT
-        sync: false
       - key: EARTH_ENGINE_PROJECT
         sync: false
-      - key: GOOGLE_SERVICE_ACCOUNT_KEY
+      - key: GEE_SERVICE_ACCOUNT_JSON
         sync: false
       - key: FLOODLENS_CORS_ALLOW_ORIGINS
         sync: false
       - key: FLOODLENS_ENABLE_SCHEDULER
         value: "true"
+      - key: FLOODLENS_RISK_REFRESH_INTERVAL_HOURS
+        value: "12"
       # Keeps scikit-learn/numpy from over-subscribing threads on a small instance —
-      # avoided an OpenBLAS memory-allocation failure during local testing.
+      # avoided a real OpenBLAS memory-allocation failure seen during local testing.
       - key: OPENBLAS_NUM_THREADS
         value: "1"
       - key: OMP_NUM_THREADS
