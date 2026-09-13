@@ -20,6 +20,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 from ai.config import get_settings
+from ai.earthengine_auth import initialize_earth_engine
 from ai.models.risk_model import LogisticRiskModel
 from ai.preprocessing.real_gee_sampling import GridSpec, build_real_training_sample
 
@@ -45,7 +46,7 @@ def _flatten_feature_grid(feature_grid: dict[str, np.ndarray]) -> tuple[np.ndarr
 
 def main() -> None:
     settings = get_settings()
-    ee.Initialize(project=settings.earthengine_project)
+    initialize_earth_engine(project=settings.earthengine_project)
 
     sample_region = ee.Geometry.BBox(*TRAINING_SAMPLE_REGION_BBOX)
     feature_grid, label_arr, extra = build_real_training_sample(

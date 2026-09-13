@@ -57,4 +57,8 @@ ai/data/*
 *.parquet
 *.joblib
 ai/outputs/
-ai/models/artifacts/
+ai/models/artifacts/*
+# Exception: the small baseline model is committed so a fresh deploy can serve predictions
+# immediately without retraining (which needs live Earth Engine access at build time).
+!ai/models/artifacts/flood_risk_logreg.joblib
+!ai/models/artifacts/training_report.json
