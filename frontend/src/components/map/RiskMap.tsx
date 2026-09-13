@@ -26,8 +26,19 @@ function toLatLngBounds(bounds: { west: number; south: number; east: number; nor
 }
 
 export function RiskMap({ region, risk, variant = 'compact' }: RiskMapProps) {
-  const grid = useRiskGrid(risk?.gridUrl);
+  const { grid, loading: gridLoading } = useRiskGrid(risk?.gridUrl);
   const [selectedCell, setSelectedCell] = useState<RiskGridCell | null>(null);
+  const [selectionFor, setSelectionFor] = useState(risk?.predictionId);
+
+  // A cell selected under one prediction can't carry over to the next — a new prediction can
+  // change grid shape/values entirely, so a stale selection would pair an old risk score with
+  // new prediction-context text in the detail panel. Reset during render rather than in an
+  // effect, so it can't briefly flash the stale selection against the new prediction first.
+  if (risk?.predictionId !== selectionFor) {
+    setSelectionFor(risk?.predictionId);
+    setSelectedCell(null);
+  }
+
   const aoiPath: LatLngTuple[] = region.geojson.coordinates[0].map(([lon, lat]) => [lat, lon]);
   const overlayBounds = risk?.bounds ? toLatLngBounds(risk.bounds) : null;
   // Fit to the actual observation footprint when one exists — it's a small fraction of the
@@ -42,7 +53,15 @@ export function RiskMap({ region, risk, variant = 'compact' }: RiskMapProps) {
 
   return (
     <div className={styles.wrap} data-variant={variant} data-detail-open={selectedCell ? 'true' : 'false'}>
-      <MapContainer bounds={mapBounds} boundsOptions={boundsOptions} scrollWheelZoom={variant === 'full'} className={styles.map}>
+      <MapContainer
+        bounds={mapBounds}
+        boundsOptions={boundsOptions}
+        scrollWheelZoom={variant === 'full'}
+        // A wider observation area can mean thousands of grid cells — canvas rendering keeps
+        // that smooth where the default per-marker SVG rendering would start to lag.
+        preferCanvas
+        className={styles.map}
+      >
         <TileLayer
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
           attribution="Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics"
@@ -76,6 +95,13 @@ export function RiskMap({ region, risk, variant = 'compact' }: RiskMapProps) {
           );
         })}
       </MapContainer>
+
+      {risk && gridLoading && (
+        <div className={styles.gridStatus}>
+          <span className={styles.spinner} />
+          Loading risk grid…
+        </div>
+      )}
 
       <div className={styles.legend}>
         <span className={styles.legendTitle}>Flood risk</span>

@@ -16,6 +16,7 @@ import styles from './SummaryCards.module.css';
 interface SummaryCardsProps {
   risk: RiskSnapshot | null;
   grid: RiskGrid | null;
+  gridLoading: boolean;
   eventCount: number;
   eventsLoading: boolean;
 }
@@ -27,7 +28,7 @@ interface Card {
   tier?: RiskTier;
 }
 
-export function SummaryCards({ risk, grid, eventCount, eventsLoading }: SummaryCardsProps) {
+export function SummaryCards({ risk, grid, gridLoading, eventCount, eventsLoading }: SummaryCardsProps) {
   const meanTier = risk ? normalizeAlertLevel(risk.alert.level) : undefined;
 
   const cells = grid?.cells ?? [];
@@ -37,6 +38,7 @@ export function SummaryCards({ risk, grid, eventCount, eventsLoading }: SummaryC
   );
   const peakTier = peakCell ? classifyRiskTier(peakCell.value) : undefined;
   const highRiskCount = cells.filter((c) => ['high', 'critical'].includes(classifyRiskTier(c.value))).length;
+  const gridPending = Boolean(risk) && gridLoading;
 
   const cards: Card[] = [
     {
@@ -47,14 +49,18 @@ export function SummaryCards({ risk, grid, eventCount, eventsLoading }: SummaryC
     },
     {
       label: 'Peak risk cell',
-      value: peakCell ? formatPercent(peakCell.value) : '—',
-      caption: peakCell ? `${peakCell.lat.toFixed(2)}°, ${peakCell.lon.toFixed(2)}°` : 'No grid data yet',
+      value: gridPending ? '…' : peakCell ? formatPercent(peakCell.value) : '—',
+      caption: gridPending
+        ? 'Loading grid…'
+        : peakCell
+          ? `${peakCell.lat.toFixed(2)}°, ${peakCell.lon.toFixed(2)}°`
+          : 'No grid data yet',
       tier: peakTier,
     },
     {
       label: 'High-risk cells',
-      value: cells.length > 0 ? `${highRiskCount} / ${cells.length}` : '—',
-      caption: 'High + Critical tiers in the current grid',
+      value: gridPending ? '…' : cells.length > 0 ? `${highRiskCount} / ${cells.length}` : '—',
+      caption: gridPending ? 'Loading grid…' : 'High + Critical tiers in the current grid',
       tier: cells.length > 0 ? (highRiskCount > 0 ? 'high' : 'low') : undefined,
     },
     {

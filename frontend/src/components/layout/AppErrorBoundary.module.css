@@ -1,0 +1,48 @@
+.wrap {
+  max-width: 560px;
+  margin: 15vh auto 0;
+  padding: 2rem;
+  text-align: center;
+}
+
+.heading {
+  font-size: 1.3rem;
+  margin-bottom: 0.6rem;
+}
+
+.message {
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.detail {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  font-size: 0.76rem;
+  color: var(--color-text-faint);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0 0 1.25rem;
+}
+
+.retry {
+  appearance: none;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 0.55rem 1.3rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retry:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

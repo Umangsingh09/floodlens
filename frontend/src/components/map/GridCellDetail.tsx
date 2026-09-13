@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import {
   classifyRiskTier,
+  computeTargetTimestamp,
   formatDuration,
   formatPercent,
   formatShortDate,
@@ -28,9 +29,7 @@ export function GridCellDetail({ cell, risk, onClose }: GridCellDetailProps) {
   }, [onClose]);
 
   const tier = classifyRiskTier(cell.value);
-  const targetDate = new Date(
-    new Date(risk.predictionTimestamp).getTime() + risk.predictionHorizonHours * 3600 * 1000,
-  );
+  const targetDate = computeTargetTimestamp(risk);
   const sceneCount = risk.observationWindowScenes?.length ?? 0;
 
   return (

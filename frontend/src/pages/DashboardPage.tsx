@@ -26,7 +26,7 @@ interface DashboardPageProps {
 
 export function DashboardPage({ region, risk, regionLoading, riskLoading, events, eventsLoading }: DashboardPageProps) {
   const { points: history } = useRiskHistory(risk?.predictionId);
-  const grid = useRiskGrid(risk?.gridUrl);
+  const { grid, loading: gridLoading } = useRiskGrid(risk?.gridUrl);
 
   if (regionLoading || riskLoading) {
     return (
@@ -58,7 +58,13 @@ export function DashboardPage({ region, risk, regionLoading, riskLoading, events
         </p>
       </div>
 
-      <SummaryCards risk={risk} grid={grid} eventCount={events.length} eventsLoading={eventsLoading} />
+      <SummaryCards
+        risk={risk}
+        grid={grid}
+        gridLoading={gridLoading}
+        eventCount={events.length}
+        eventsLoading={eventsLoading}
+      />
 
       {risk ? (
         <>

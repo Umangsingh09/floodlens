@@ -365,8 +365,17 @@ def _select_and_build_feature_grid(
         scene_geometry = ee.Geometry(scene_image.geometry())
         if not scene_geometry.intersects(sample_roi, ee.ErrorMargin(1)).getInfo():
             continue
-        vv_values = np.asarray(scene_image.select("VV").sampleRectangle(sample_roi, defaultValue=0).get("VV").getInfo(), dtype=np.float32)
-        vh_values = np.asarray(scene_image.select("VH").sampleRectangle(sample_roi, defaultValue=0).get("VH").getInfo(), dtype=np.float32)
+        # Check for real signal at the training-grid resolution, not Sentinel-1's native ~10 m —
+        # sampling a wide ROI at native resolution here (before we even know if this candidate
+        # scene survives) can request far more pixels than sampleRectangle allows once the ROI
+        # covers more than a few km per side. The 250 m grid is already pixel-budget-checked
+        # above via `_estimate_sample_pixels`, so reusing that resolution keeps this bounded
+        # regardless of ROI size, and a coarse mean is still a valid "is there real data here"
+        # check for `_has_real_signal`'s magnitude threshold.
+        vv_coarse = _aggregate_ee_image_to_training_grid(scene_image.select("VV"), target_roi, crs=grid.crs, scale_m=grid.scale_m)
+        vh_coarse = _aggregate_ee_image_to_training_grid(scene_image.select("VH"), target_roi, crs=grid.crs, scale_m=grid.scale_m)
+        vv_values = _sample_ee_image_to_2d(vv_coarse, target_roi, band="VV")
+        vh_values = _sample_ee_image_to_2d(vh_coarse, target_roi, band="VH")
         has_real_signal = _has_real_signal(vv_values, vh_values)
         if not has_real_signal:
             continue

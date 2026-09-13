@@ -33,6 +33,13 @@ export function formatPercent(value: number | null | undefined, digits = 0): str
   return `${(value * 100).toFixed(digits)}%`;
 }
 
+/** The prediction's target/outlook timestamp — always exactly `predictionHorizonHours` after
+ *  `predictionTimestamp`. Shared so every place that shows it (pipeline steps, grid cell
+ *  detail) computes it the same way. */
+export function computeTargetTimestamp(risk: { predictionTimestamp: string; predictionHorizonHours: number }): Date {
+  return new Date(new Date(risk.predictionTimestamp).getTime() + risk.predictionHorizonHours * 3600 * 1000);
+}
+
 interface ParsedScene {
   id: string;
   platform: string;

@@ -1,0 +1,21 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.1rem;
+  margin: 0 0 1.25rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, #d03b3b 12%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, #d03b3b 35%, var(--color-border));
+  color: var(--color-text-dim);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: #d03b3b;
+  flex-shrink: 0;
+}

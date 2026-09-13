@@ -1,11 +1,9 @@
-import { formatDuration, formatShortDate, formatTime } from '../../lib/format';
+import { computeTargetTimestamp, formatDuration, formatShortDate, formatTime } from '../../lib/format';
 import type { RiskSnapshot } from '../../types/risk';
 import styles from './PipelineSteps.module.css';
 
 export function PipelineSteps({ risk }: { risk: RiskSnapshot }) {
-  const targetDate = new Date(
-    new Date(risk.predictionTimestamp).getTime() + risk.predictionHorizonHours * 3600 * 1000,
-  );
+  const targetDate = computeTargetTimestamp(risk);
 
   const steps = [
     {

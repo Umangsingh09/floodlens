@@ -30,7 +30,7 @@ from ai.preprocessing.real_gee_sampling import GridSpec, build_live_feature_grid
 logger = logging.getLogger(__name__)
 
 # Same real, Sentinel-1-covered sample region used for training, inside the Bihar-Nepal AOI.
-LIVE_SAMPLE_REGION_BBOX = (85.77, 26.18, 85.81, 26.22)
+LIVE_SAMPLE_REGION_BBOX = (85.715, 26.13, 85.865, 26.27)
 MODEL_PATH = Path(__file__).resolve().parents[1] / "models" / "artifacts" / "flood_risk_logreg.joblib"
 OUTPUT_ROOT = Path(__file__).resolve().parents[1] / "outputs"
 PREDICTION_HORIZON_HOURS = 24 * 7

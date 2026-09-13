@@ -25,8 +25,10 @@ from ai.preprocessing.real_gee_sampling import GridSpec, build_real_training_sam
 
 # Real, historically validated flooded location within the Bihar-Nepal AOI for DFO 4507
 # (see docs/AI_INTEGRATION.md for the historical reference). Chosen because it actually
-# contains both flooded and non-flooded grid cells per the GFD reference.
-TRAINING_SAMPLE_REGION_BBOX = (85.77, 26.18, 85.81, 26.22)
+# contains both flooded and non-flooded grid cells per the GFD reference — verified live
+# against the real GFD event: ~3.8k 250m cells, 36% flooded / 64% not, a healthy class split
+# (the original, much smaller box here was 19x17=323 cells at a skewed 79%/21% split).
+TRAINING_SAMPLE_REGION_BBOX = (85.715, 26.13, 85.865, 26.27)
 TRAINING_OBSERVATION_TIMESTAMP = "2017-08-21T00:00:00"
 
 ARTIFACT_DIR = Path(__file__).resolve().parents[1] / "models" / "artifacts"

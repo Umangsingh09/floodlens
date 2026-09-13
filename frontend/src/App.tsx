@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ErrorBanner } from './components/layout/ErrorBanner';
 import { Header } from './components/layout/Header';
 import { TabNav, type TabKey } from './components/layout/TabNav';
 import { useEvents } from './hooks/useEvents';
@@ -15,7 +16,7 @@ import { MapPage } from './pages/MapPage';
 function App() {
   const [tab, setTab] = useState<TabKey>('dashboard');
   const { region, loading: regionLoading } = useRegion();
-  const { risk, loading: riskLoading, refreshing, refresh } = useLatestRisk();
+  const { risk, loading: riskLoading, error: riskError, refreshing, refresh } = useLatestRisk();
   const { events, loading: eventsLoading } = useEvents();
   const { points: historyPoints, loading: historyLoading } = useRiskHistory(risk?.predictionId, 50);
 
@@ -24,6 +25,8 @@ function App() {
       header={<Header region={region} risk={risk} refreshing={refreshing} onRefresh={refresh} />}
       tabs={<TabNav active={tab} onChange={setTab} />}
     >
+      {riskError && <ErrorBanner message={riskError} />}
+
       {tab === 'dashboard' && (
         <DashboardPage
           region={region}

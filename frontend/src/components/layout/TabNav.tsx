@@ -25,6 +25,7 @@ export function TabNav({ active, onChange }: TabNavProps) {
             type="button"
             className={styles.tab}
             data-active={tab.key === active}
+            aria-current={tab.key === active ? 'page' : undefined}
             onClick={() => onChange(tab.key)}
           >
             {tab.label}
