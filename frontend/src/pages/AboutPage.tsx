@@ -13,7 +13,10 @@ interface AboutPageProps {
 const FALLBACK_LIMITATION =
   'The current baseline model is trained on a single real historical event ' +
   '(Sentinel-1 + the Global Flood Database reference for DFO 4507, Aug 2017) — treat this ' +
-  'as a hackathon proof of pipeline, not a calibrated production forecast.';
+  'as a hackathon proof of pipeline, not a calibrated production forecast. Rainfall and soil ' +
+  "moisture are real, live inputs, but with only one historical training instant, the model " +
+  "can't yet learn how they affect outcome — that needs training data spanning multiple real " +
+  'events with different rainfall conditions.';
 
 export function AboutPage({ region, risk, events }: AboutPageProps) {
   return (
@@ -84,6 +87,13 @@ export function AboutPage({ region, risk, events }: AboutPageProps) {
             <div>
               <dt>Current model</dt>
               <dd>{risk ? `${risk.modelId} · ${risk.modelVersion}` : 'no live prediction yet'}</dd>
+            </div>
+            <div>
+              <dt>Model inputs</dt>
+              <dd>
+                Sentinel-1 backscatter change, terrain (elevation/slope), plus real-time rainfall
+                (NASA GPM) and soil moisture (NASA SMAP)
+              </dd>
             </div>
             <div>
               <dt>Validated against</dt>

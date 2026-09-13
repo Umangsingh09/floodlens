@@ -142,6 +142,8 @@ def test_real_phase2_feature_pipeline_small_window():
         "water_trend",
         "elevation",
         "slope",
+        "rainfall_7d",
+        "soil_moisture",
     ]
 
     print({

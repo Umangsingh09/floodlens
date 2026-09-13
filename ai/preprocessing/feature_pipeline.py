@@ -21,6 +21,8 @@ def build_feature_stack_from_arrays(
     water_baseline: np.ndarray | None = None,
     elevation: np.ndarray | None = None,
     slope: np.ndarray | None = None,
+    rainfall_7d: np.ndarray | None = None,
+    soil_moisture: np.ndarray | None = None,
     fill_value: float = 0.0,
 ) -> dict[str, np.ndarray]:
     """Create a reusable feature stack aligned to the Sentinel-1 analysis grid."""
@@ -33,6 +35,8 @@ def build_feature_stack_from_arrays(
         water_current=water_current,
         water_previous=water_previous,
         water_baseline=water_baseline,
+        rainfall_7d=rainfall_7d,
+        soil_moisture=soil_moisture,
     )
 
     if elevation is not None or slope is not None:
@@ -68,6 +72,8 @@ def get_default_feature_names() -> list[str]:
         "water_trend",
         "elevation",
         "slope",
+        "rainfall_7d",
+        "soil_moisture",
     ]
 
 

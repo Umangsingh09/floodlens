@@ -82,6 +82,17 @@ def run_prediction(*, output_root: Path | None = None) -> dict[str, Any]:
         "mean": float(np.nanmean(risk)),
     }
 
+    # Real GPM IMERG rainfall + SMAP soil moisture, averaged over the observation area. Both are
+    # far coarser than the 250m grid (IMERG ~11km, SMAP ~9km) relative to this ~16km AOI, so a
+    # per-cell breakdown wouldn't be meaningful — the area sits within roughly one source pixel.
+    # Reported as regional context, not a per-cell feature.
+    weather_context = None
+    if "rainfall_7d" in feature_grid and "soil_moisture" in feature_grid:
+        weather_context = {
+            "rainfall7dMm": float(np.nanmean(feature_grid["rainfall_7d"])),
+            "soilMoistureSurface": float(np.nanmean(feature_grid["soil_moisture"])),
+        }
+
     prediction_id = now_utc.strftime("%Y%m%dT%H%M%SZ")
     prediction_dir = output_root / prediction_id
     prediction_dir.mkdir(parents=True, exist_ok=True)
@@ -120,7 +131,14 @@ def run_prediction(*, output_root: Path | None = None) -> dict[str, Any]:
         "alert": {"threshold": settings.risk_threshold},
         "observationWindowScenes": meta.get("selected_scene_ids"),
         "gridShape": list(grid_shape),
-        "note": "Baseline model trained on a single real 2017 historical event; treat as a hackathon proof of pipeline, not a calibrated production forecast.",
+        "weatherContext": weather_context,
+        "note": (
+            "Baseline model trained on a single real 2017 historical event; treat as a hackathon "
+            "proof of pipeline, not a calibrated production forecast. Rainfall and soil moisture "
+            "are real, live inputs, but with only one historical training instant, the model can't "
+            "yet learn how they affect outcome — that needs training data spanning multiple real "
+            "events with different rainfall conditions."
+        ),
     }
     (prediction_dir / "prediction_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     logger.info(

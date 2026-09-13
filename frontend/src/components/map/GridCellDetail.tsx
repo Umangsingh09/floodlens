@@ -82,11 +82,20 @@ export function GridCellDetail({ cell, risk, onClose }: GridCellDetailProps) {
             {risk.modelId} · {risk.modelVersion}
           </dd>
         </div>
+        {risk.weatherContext && (
+          <div className={styles.row}>
+            <dt>Regional weather</dt>
+            <dd>
+              {risk.weatherContext.rainfall7dMm.toFixed(0)}mm rain (7d) ·{' '}
+              {risk.weatherContext.soilMoistureSurface.toFixed(2)} soil moisture
+            </dd>
+          </div>
+        )}
       </dl>
 
       <p className={styles.note}>
-        Environmental features (elevation, water history) that feed the model aren't exposed
-        per-cell by the current API — only the aggregate risk score above is.
+        Elevation, water history, and weather feed the model but aren't exposed per-cell by the
+        current API — the regional weather reading above (and the risk score) are the exceptions.
       </p>
     </div>
   );

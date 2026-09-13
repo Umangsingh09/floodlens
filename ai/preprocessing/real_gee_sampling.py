@@ -11,6 +11,11 @@ from ai.historical_reference import GFD_REFERENCE_RESOLUTION_M, build_gfd_flood_
 from ai.preprocessing.sentinel1 import align_image_to_reference_grid, get_reference_projection
 from ai.preprocessing.temporal_features import build_feature_stack
 from ai.preprocessing.water_mask import compute_water_mask
+from ai.preprocessing.weather_features import (
+    RAINFALL_LOOKBACK_DAYS,
+    fetch_antecedent_rainfall,
+    fetch_soil_moisture,
+)
 
 DEFAULT_TRAINING_GRID_CRS = "EPSG:32645"
 DEFAULT_TRAINING_GRID_SCALE_M = 250.0
@@ -444,6 +449,19 @@ def _select_and_build_feature_grid(
     dem_array = _sample_ee_image_to_2d(dem_250, target_roi, band="elevation").astype(np.float32)
     slope_array = _sample_ee_image_to_2d(slope_250, target_roi, band="slope").astype(np.float32)
 
+    # Real weather/hydrology inputs. Both are far coarser than the 250 m training grid (GPM
+    # IMERG ~11 km, SMAP L4 ~9 km), so this is upsampling by interpolation (bilinear resample +
+    # reproject), not `_aggregate_ee_image_to_training_grid`'s downsampling reduceResolution —
+    # that op requires the target to be coarser than the source, which is backwards here.
+    training_projection = ee.Projection(grid.crs).atScale(grid.scale_m)
+    rainfall_image = fetch_antecedent_rainfall(target_roi, obs_dt, lookback_days=RAINFALL_LOOKBACK_DAYS)
+    rainfall_resampled = rainfall_image.resample("bilinear").reproject(training_projection)
+    rainfall_array = _sample_ee_image_to_2d(rainfall_resampled, target_roi, band="rainfall_7d").astype(np.float32)
+
+    soil_moisture_image = fetch_soil_moisture(target_roi, obs_dt)
+    soil_moisture_resampled = soil_moisture_image.resample("bilinear").reproject(training_projection)
+    soil_moisture_array = _sample_ee_image_to_2d(soil_moisture_resampled, target_roi, band="soil_moisture").astype(np.float32)
+
     feature_stack = build_feature_stack(
         vv_t_arr,
         vh_t_arr,
@@ -454,6 +472,8 @@ def _select_and_build_feature_grid(
         water_baseline=water_baseline.astype(np.float32),
         elevation=dem_array,
         slope=slope_array,
+        rainfall_7d=rainfall_array,
+        soil_moisture=soil_moisture_array,
         fill_value=0.0,
     )
 

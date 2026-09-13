@@ -80,6 +80,16 @@ export function SummaryCards({ risk, grid, gridLoading, eventCount, eventsLoadin
       value: risk ? `${Math.round(risk.predictionHorizonHours / 24)}d` : '—',
       caption: risk ? `${risk.predictionHorizonHours}h ahead of the observation` : 'Set once a prediction has run',
     },
+    {
+      label: '7-day rainfall',
+      value: risk?.weatherContext ? `${risk.weatherContext.rainfall7dMm.toFixed(0)}mm` : '—',
+      caption: 'Real GPM IMERG data, regional average (not per-cell)',
+    },
+    {
+      label: 'Soil moisture',
+      value: risk?.weatherContext ? risk.weatherContext.soilMoistureSurface.toFixed(2) : '—',
+      caption: 'Real NASA SMAP surface reading, 0–1 scale',
+    },
   ];
 
   return (

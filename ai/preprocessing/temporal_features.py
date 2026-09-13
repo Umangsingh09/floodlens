@@ -97,6 +97,8 @@ def build_feature_stack(
     water_baseline: np.ndarray | None = None,
     elevation: np.ndarray | None = None,
     slope: np.ndarray | None = None,
+    rainfall_7d: np.ndarray | None = None,
+    soil_moisture: np.ndarray | None = None,
 ) -> dict[str, np.ndarray]:
     """Build interpretable Sentinel-1 temporal features.
 
@@ -150,5 +152,15 @@ def build_feature_stack(
         if elevation_arr.shape != slope_arr.shape:
             raise ValueError("Elevation and slope arrays must have matching dimensions.")
         features.update({"elevation": elevation_arr, "slope": slope_arr})
+
+    if rainfall_7d is not None:
+        features["rainfall_7d"] = _as_2d_array(
+            np.nan_to_num(rainfall_7d, nan=fill_value, posinf=fill_value, neginf=fill_value)
+        )
+
+    if soil_moisture is not None:
+        features["soil_moisture"] = _as_2d_array(
+            np.nan_to_num(soil_moisture, nan=fill_value, posinf=fill_value, neginf=fill_value)
+        )
 
     return features

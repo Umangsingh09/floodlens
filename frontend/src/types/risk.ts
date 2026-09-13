@@ -11,6 +11,13 @@ export interface RiskAlert {
   threshold: number;
 }
 
+/** Real, live regional weather/hydrology context — averaged over the observation area, not a
+ *  per-cell value (the source data is coarser than the grid; see RiskSnapshot.note). */
+export interface WeatherContext {
+  rainfall7dMm: number;
+  soilMoistureSurface: number;
+}
+
 export interface RiskSnapshot {
   predictionId: string;
   regionId: string;
@@ -32,6 +39,7 @@ export interface RiskSnapshot {
   gridUrl: string | null;
   observationWindowScenes: string[] | null;
   gridShape: [number, number] | null;
+  weatherContext: WeatherContext | null;
   note: string | null;
 }
 

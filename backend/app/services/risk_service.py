@@ -76,6 +76,7 @@ class RiskService:
             gridUrl=f"/api/risk/{prediction_id}/grid" if has_raster else None,
             observationWindowScenes=metadata.get("observationWindowScenes"),
             gridShape=metadata.get("gridShape"),
+            weatherContext=metadata.get("weatherContext"),
             note=metadata.get("note"),
         )
 

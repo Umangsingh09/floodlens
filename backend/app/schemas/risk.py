@@ -21,6 +21,14 @@ class RiskBounds(BaseModel):
     north: float
 
 
+class WeatherContext(BaseModel):
+    """Real, live regional weather/hydrology context — not a per-cell feature. See
+    `RiskResponse.note` for why the model can't yet weigh these against outcome."""
+
+    rainfall7dMm: float
+    soilMoistureSurface: float
+
+
 class RiskResponse(BaseModel):
     predictionId: str
     regionId: str = "bihar-nepal"
@@ -42,6 +50,7 @@ class RiskResponse(BaseModel):
     gridUrl: str | None = None
     observationWindowScenes: list[str] | None = None
     gridShape: list[int] | None = None
+    weatherContext: WeatherContext | None = None
     note: str | None = None
 
 
