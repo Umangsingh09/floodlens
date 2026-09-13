@@ -5,6 +5,11 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
+# Single source of truth for the model version string — both the training script (which writes
+# it into the artifact/report) and the inference script (which writes it into every prediction's
+# metadata) import this, so the two can't silently drift out of sync.
+MODEL_VERSION = "0.2.0-multi-event"
+
 
 class LogisticRiskModel:
     """Simple, interpretable flood-risk baseline using logistic regression.

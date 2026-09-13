@@ -4,9 +4,9 @@ from app.schemas.events import HistoricalEvent
 
 
 def list_historical_events() -> list[HistoricalEvent]:
-    from ai.historical_reference import create_gfd_validation_event_metadata
+    from ai.historical_reference import list_validated_gfd_events
 
-    summary = create_gfd_validation_event_metadata()
+    summaries = list_validated_gfd_events()
     return [
         HistoricalEvent(
             dfoId=summary.dfo_id,
@@ -18,4 +18,5 @@ def list_historical_events() -> list[HistoricalEvent]:
             resolutionMeters=summary.resolution_m,
             referenceType=summary.reference_type,
         )
+        for summary in summaries
     ]

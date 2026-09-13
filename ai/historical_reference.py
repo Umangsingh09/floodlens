@@ -14,6 +14,12 @@ GFD_REFERENCE_TYPE = "remotely sensed historical reference"
 GFD_REFERENCE_RESOLUTION_M = 250.0
 GFD_REFERENCE_CRS = "EPSG:4326"
 
+# Second real validation/training event (Sep 2018), added alongside DFO 4507 so the model has
+# more than one real historical instant to learn from — see ai/training/train_risk_model.py.
+GFD_SECOND_EVENT_DFO_ID = 4673
+GFD_SECOND_EVENT_START = "2018-09-01"
+GFD_SECOND_EVENT_END = "2018-09-07"
+
 
 @dataclass(frozen=True)
 class GFDReferenceSummary:
@@ -95,7 +101,8 @@ def select_gfd_event(events: Iterable[Mapping[str, Any]], dfo_id: int = GFD_VALI
 
 
 def create_gfd_validation_event_metadata() -> GFDReferenceSummary:
-    """Return the validated DFO 4507 metadata for the historical reference run."""
+    """Return the original validated DFO 4507 metadata (kept for backward compatibility —
+    prefer `list_validated_gfd_events()` for the full set now used for training)."""
     return GFDReferenceSummary(
         dfo_id=GFD_VALIDATION_DFO_ID,
         image_id="DFO_4507_From_20170810_to_20170826",
@@ -106,6 +113,28 @@ def create_gfd_validation_event_metadata() -> GFDReferenceSummary:
         resolution_m=GFD_REFERENCE_RESOLUTION_M,
         reference_type=GFD_REFERENCE_TYPE,
     )
+
+
+def list_validated_gfd_events() -> list[GFDReferenceSummary]:
+    """Return every real historical event now used for training/validation, DFO 4507 first.
+
+    Both were verified live against the real GFD dataset at the actual training sample region
+    before being added here (real, non-degenerate flood-label variation; real Sentinel-1 scenes
+    available before the observation date) — see ai/training/train_risk_model.py.
+    """
+    return [
+        create_gfd_validation_event_metadata(),
+        GFDReferenceSummary(
+            dfo_id=GFD_SECOND_EVENT_DFO_ID,
+            image_id=f"DFO_{GFD_SECOND_EVENT_DFO_ID}_From_{GFD_SECOND_EVENT_START.replace('-', '')}_to_{GFD_SECOND_EVENT_END.replace('-', '')}",
+            start_date=GFD_SECOND_EVENT_START,
+            end_date=GFD_SECOND_EVENT_END,
+            primary_country="India",
+            countries="China, India, Nepal, Bangladesh",
+            resolution_m=GFD_REFERENCE_RESOLUTION_M,
+            reference_type=GFD_REFERENCE_TYPE,
+        ),
+    ]
 
 
 def get_earthengine_gfd_collection() -> Any:
@@ -184,5 +213,6 @@ __all__ = [
     "create_gfd_validation_event_metadata",
     "get_dfo_4507_reference_image",
     "get_earthengine_gfd_collection",
+    "list_validated_gfd_events",
     "select_gfd_event",
 ]

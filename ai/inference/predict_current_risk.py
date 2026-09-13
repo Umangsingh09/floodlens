@@ -25,7 +25,7 @@ from rasterio.transform import from_bounds
 
 from ai.config import get_settings
 from ai.gee_auth import initialize_earth_engine
-from ai.models.risk_model import LogisticRiskModel
+from ai.models.risk_model import MODEL_VERSION, LogisticRiskModel
 from ai.preprocessing.real_gee_sampling import GridSpec, build_live_feature_grid
 
 logger = logging.getLogger(__name__)
@@ -127,17 +127,18 @@ def run_prediction(*, output_root: Path | None = None) -> dict[str, Any]:
         "processingLagSeconds": processing_lag_seconds if processing_lag_seconds is not None else 0,
         "predictionHorizonHours": PREDICTION_HORIZON_HOURS,
         "modelId": "logistic-regression",
-        "modelVersion": "0.1.0-baseline",
+        "modelVersion": MODEL_VERSION,
         "alert": {"threshold": settings.risk_threshold},
         "observationWindowScenes": meta.get("selected_scene_ids"),
         "gridShape": list(grid_shape),
         "weatherContext": weather_context,
         "note": (
-            "Baseline model trained on a single real 2017 historical event; treat as a hackathon "
-            "proof of pipeline, not a calibrated production forecast. Rainfall and soil moisture "
-            "are real, live inputs, but with only one historical training instant, the model can't "
-            "yet learn how they affect outcome — that needs training data spanning multiple real "
-            "events with different rainfall conditions."
+            "Baseline model trained on 2 real historical events (Aug 2017, Sep 2018); treat as a "
+            "hackathon proof of pipeline, not a calibrated production forecast. Rainfall and soil "
+            "moisture are real, live inputs and now have real variation across events to learn "
+            "from, but 2 events is still a thin basis for a robust rainfall/outcome relationship — "
+            "more real historical events, ideally spanning a wider range of rainfall conditions, "
+            "would make this more reliable."
         ),
     }
     (prediction_dir / "prediction_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")

@@ -1,5 +1,5 @@
 {
-  "model_version": "0.1.0-baseline",
+  "model_version": "0.2.0-multi-event",
   "model_type": "logistic_regression",
   "feature_names": [
     "delta_vh",
@@ -19,21 +19,59 @@
     "water_previous",
     "water_trend"
   ],
-  "training_rows": 3843,
-  "positive_rows": 1364,
-  "negative_rows": 2479,
-  "held_out_test_rows": 961,
-  "held_out_test_auc": 0.8330101220319743,
-  "held_out_test_accuracy": 0.7419354838709677,
-  "training_data_source": "real Sentinel-1 GRD + GFD DFO 4507 (Aug 2017), Bihar-Nepal AOI",
-  "not_real_time": true,
-  "observation_timestamp": "2017-08-21T00:00:00",
-  "target_timestamp": "2017-08-28T00:00:00",
-  "selected_scene_ids": [
-    "S1A_IW_GRDH_1SDV_20170808T122137_20170808T122202_017832_01DE48_D7D6",
-    "S1A_IW_GRDH_1SDV_20170811T001139_20170811T001204_017868_01DF62_43D9",
-    "S1A_IW_GRDH_1SDV_20170820T122138_20170820T122203_018007_01E393_768A"
+  "training_rows": 7686,
+  "positive_rows": 1610,
+  "negative_rows": 6076,
+  "events": [
+    {
+      "name": "dfo-4507-2017-08",
+      "observationTimestamp": "2017-08-21T00:00:00",
+      "targetTimestamp": "2017-08-28T00:00:00",
+      "rows": 3843,
+      "positiveRows": 1364,
+      "floodReferencePercentage": 35.49310434556337,
+      "selectedSceneIds": [
+        "S1A_IW_GRDH_1SDV_20170808T122137_20170808T122202_017832_01DE48_D7D6",
+        "S1A_IW_GRDH_1SDV_20170811T001139_20170811T001204_017868_01DF62_43D9",
+        "S1A_IW_GRDH_1SDV_20170820T122138_20170820T122203_018007_01E393_768A"
+      ]
+    },
+    {
+      "name": "gfd-4673-2018-09",
+      "observationTimestamp": "2018-09-03T00:00:00",
+      "targetTimestamp": "2018-09-10T00:00:00",
+      "rows": 3843,
+      "positiveRows": 246,
+      "floodReferencePercentage": 6.401249024199844,
+      "selectedSceneIds": [
+        "S1A_IW_GRDH_1SDV_20180818T001146_20180818T001211_023293_028872_BAEB",
+        "S1A_IW_GRDH_1SDV_20180827T122145_20180827T122210_023432_028CD5_E3E2",
+        "S1A_IW_GRDH_1SDV_20180830T001147_20180830T001212_023468_028E02_B703"
+      ]
+    }
   ],
+  "heldOutEventEvaluation": [
+    {
+      "heldOutEvent": "dfo-4507-2017-08",
+      "trainedOnEvents": [
+        "gfd-4673-2018-09"
+      ],
+      "heldOutRows": 3843,
+      "heldOutAuc": 0.6026741934300913,
+      "heldOutAccuracy": 0.6533957845433255
+    },
+    {
+      "heldOutEvent": "gfd-4673-2018-09",
+      "trainedOnEvents": [
+        "dfo-4507-2017-08"
+      ],
+      "heldOutRows": 3843,
+      "heldOutAuc": 0.8094663348635154,
+      "heldOutAccuracy": 0.9185532136351808
+    }
+  ],
+  "training_data_source": "real Sentinel-1 GRD + GFD (2 real historical events), Bihar-Nepal AOI",
+  "not_real_time": true,
   "grid_crs": "EPSG:32645",
   "grid_scale_m": 250.0
 }
